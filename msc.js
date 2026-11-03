@@ -244,8 +244,38 @@ function renderChecks() {
     <div class="check ${consOk ? "check-ok" : "check-falha"}"><span class="check-ico" aria-hidden="true">${consOk ? "✓" : "×"}</span>
       <div><strong>Saldo inicial + movimento = saldo final ${consOk ? `em todas as ${int.format(cons.contas)} contas` : `falha em ${int.format(cons.n_divergentes)} de ${int.format(cons.contas)} contas`}</strong>
       <span class="det">Os três tipos de valor se conectam: o saldo final de cada conta é o saldo inicial do mês somado ao movimento.</span></div></div>` +
-    checkSubsistemas();
+    checkSubsistemas() + checkNatureza();
 }
+
+function checkNatureza() {
+  const lista = estado.resumo.natureza_contraria;
+  if (!lista) return "";
+  if (!lista.length) {
+    return `<div class="check check-ok"><span class="check-ico" aria-hidden="true">✓</span>
+      <div><strong>Todas as contas terminam o mês com saldo da natureza prevista no PCASP</strong></div></div>`;
+  }
+  const itens = lista.slice(0, 8).map((x) =>
+    `<li><button type="button" class="link-conta" data-conta="${x.conta}"><code>${fmtConta(x.conta)}</code> ${esc(x.nome)}</button>: prevista ${x.esperada.toLowerCase()}, saldo final ${compacto(x.valor)} ${x.atual === "Devedora" ? "D" : "C"}</li>`
+  ).join("");
+  return `<div class="check check-aviso"><span class="check-ico" aria-hidden="true">!</span>
+    <div><strong>${lista.length} ${lista.length === 1 ? "conta termina" : "contas terminam"} o mês com saldo de natureza contrária à prevista no PCASP</strong>
+    <span class="det">No saldo final, comparado à natureza de saldo de cada conta no PCASP. Costuma indicar lançamento a revisar (por exemplo, um passivo com saldo devedor). Clique para abrir no explorador.</span>
+    <ul class="lista-natureza">${itens}</ul></div></div>`;
+}
+
+$("checks").addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-conta]");
+  if (!b) return;
+  if (estado.tv !== "ending_balance") {
+    estado.tv = "ending_balance";
+    renderTV();
+    estado.sel = b.dataset.conta;
+    carregarTV().then(() => selecionar(b.dataset.conta));
+  } else {
+    selecionar(b.dataset.conta);
+  }
+  $("h-explorador").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 function renderClasses() {
   const r = estado.resumo;
@@ -426,12 +456,32 @@ function renderDetalhe(d) {
     <div class="table-wrap"><table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
     <tbody>${d.amostra.map((r) => `<tr>${cols.map((c) => `<td>${c === "valor" ? brl.format(r[c]) : esc(r[c] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
 
+  const info = (estado.resumo.pcasp_info || {})[d.prefixo];
+  let blocoPcasp = "";
+  if (info) {
+    const s = d.d - d.c;
+    const atual = Math.abs(s) < 0.005 ? null : s > 0 ? "Devedora" : "Credora";
+    const contraria = atual && ["Devedora", "Credora"].includes(info.n) && atual !== info.n;
+    const tags = [
+      `<span class="pc-tag${contraria ? " pc-alerta" : ""}" title="Natureza de saldo prevista no PCASP">Natureza prevista: ${esc(info.n)}${contraria ? ` · saldo atual ${atual.toLowerCase()}` : ""}</span>`,
+      info.sf && info.sf !== "-" ? `<span class="pc-tag" title="Indicador de superávit financeiro">${esc(info.sf)}</span>` : "",
+      `<span class="pc-tag">${info.d === "Último" ? "Conta de último nível (recebe lançamentos)" : "Conta sintética (soma os níveis abaixo)"}</span>`,
+      info.op && info.op !== "Original" ? `<span class="pc-tag" title="${esc(info.ca || "")}">${esc(info.op)} no PCASP 2027${info.ca && info.ca !== "-" ? `: ${esc(info.ca)}` : ""}</span>` : "",
+    ].join("");
+    blocoPcasp = `<div class="pcasp-bloco">
+      <div class="pc-oficial">${esc(info.to)}</div>
+      ${info.f ? `<p class="pc-funcao">${esc(info.f)}</p>` : ""}
+      <div class="pc-tags">${tags}</div>
+    </div>`;
+  }
+
   $("detalhe").innerHTML = `
     <div class="det-cab">
       <span class="det-cod">${esc(d.codigo)}</span>
       <span class="det-nome">${esc(d.nome || "Sem rótulo de referência")}</span>
       <span class="det-nivel">Nível: ${esc(d.nivel)} · ${esc(estado.resumo.tipos_valor[estado.tv])}</span>
     </div>
+    ${blocoPcasp}
     <div class="det-valores">
       <span>Devedor<br><b>${brl.format(d.d)}</b></span>
       <span>Credor<br><b>${brl.format(d.c)}</b></span>

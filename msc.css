@@ -2,13 +2,15 @@
   --series-1: #2a78d6;
   --bar-bg: #e9eef6;
   --st-good: #0ca30c;
+  --st-warning: #fab219;
+  --hl-alerta: #fff3d1;
   --st-critical: #d03b3b;
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --series-1: #3987e5; --bar-bg: #232a36; }
+  :root:not([data-theme="light"]) { --series-1: #3987e5; --bar-bg: #232a36; --hl-alerta: #3a2e12; }
 }
-:root[data-theme="dark"] { --series-1: #3987e5; --bar-bg: #232a36; }
+:root[data-theme="dark"] { --series-1: #3987e5; --bar-bg: #232a36; --hl-alerta: #3a2e12; }
 
 .msc-main { max-width: 1280px; }
 .msc-h2 { font-size: 16px; margin: 26px 0 8px; }
@@ -55,6 +57,30 @@
   color: #fff; font-size: 12px; font-weight: 700; flex: none; margin-top: 1px;
 }
 .check-ok .check-ico { background: var(--st-good); }
+.check-aviso .check-ico { background: var(--st-warning); color: #3b2a00; }
+.lista-natureza { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+.lista-natureza li { margin-bottom: 2px; }
+.link-conta {
+  font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
+}
+.link-conta:hover { text-decoration: underline; }
+.link-conta:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.pcasp-bloco {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 8px 8px 0;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+.pc-oficial { font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--muted); }
+.pc-funcao { font-size: 13px; margin: 4px 0 6px; line-height: 1.5; }
+.pc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.pc-tag {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  background: var(--panel); border: 1px solid var(--border); color: var(--text);
+}
+.pc-tag.pc-alerta { border-color: var(--st-warning); background: var(--hl-alerta); }
 .check-falha .check-ico { background: var(--st-critical); }
 .check strong { display: block; }
 .check span.det { color: var(--muted); }
