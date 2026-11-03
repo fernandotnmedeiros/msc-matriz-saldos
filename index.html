@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SICONFI · Matriz de Saldos Contábeis</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="msc.css">
+</head>
+<body>
+<header class="topbar">
+  
+  <h1>MSC · Matriz de Saldos Contábeis <span class="subtitle" id="subtitulo">Carregando...</span></h1>
+</header>
+
+<main class="msc-main">
+  <section class="controls">
+    <div class="field field-grow">
+      <label for="competencia">Ente e competência</label>
+      <select id="competencia"></select>
+    </div>
+    <div class="field">
+      <span class="field-label" id="tv-label">Tipo de valor</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="tv-label" id="tv"></div>
+    </div>
+  </section>
+
+  <section class="msc-intro">
+    <p>A MSC é o balancete que cada ente envia todo mês ao Tesouro. Cada linha é uma <strong>conta contábil</strong> do PCASP combinada com <strong>informações complementares</strong> (poder/órgão, fonte de recursos, função, natureza da receita ou da despesa etc.), com um <strong>valor</strong> e a sua <strong>natureza</strong> (D = devedor, C = credor). O mesmo conjunto vem em três versões: saldo inicial do mês, movimento do mês e saldo final.</p>
+  </section>
+
+  <section aria-labelledby="h-numeros">
+    <h2 class="msc-h2" id="h-numeros">A base em números</h2>
+    <div class="stats" id="stats"></div>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <section aria-labelledby="h-classes">
+    <h2 class="msc-h2" id="h-classes">As 8 classes do PCASP <span class="msc-h2-sub" id="classes-sub"></span></h2>
+    <div class="table-wrap msc-table">
+      <table>
+        <thead><tr>
+          <th>Classe</th><th>Endpoint da API</th><th>Registros</th><th>Contas</th>
+          <th>Devedor (D)</th><th>Credor (C)</th><th>Saldo</th>
+        </tr></thead>
+        <tbody id="classes-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-explorador">
+    <h2 class="msc-h2" id="h-explorador">Explorador de contas <span class="msc-h2-sub" id="explorador-sub"></span></h2>
+    <p class="msc-ajuda">Abra a árvore para descer de classe até a conta de 9 dígitos. Clique numa linha para ver como ela se divide pelas informações complementares e alguns registros reais.</p>
+    <div class="explorador">
+      <div class="arvore-col">
+        <div class="field">
+          <label for="busca">Buscar conta (código ou nome)</label>
+          <input id="busca" type="search" placeholder="Ex.: 6221304, caixa, imobilizado" autocomplete="off">
+        </div>
+        <div class="table-wrap arvore-wrap">
+          <table class="arvore" aria-label="Árvore de contas">
+            <thead><tr><th>Conta</th><th>Saldo</th><th>Reg.</th></tr></thead>
+            <tbody id="arvore-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="detalhe-col" id="detalhe" aria-live="polite">
+        <p class="msc-ajuda">Selecione uma conta na árvore.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-campos">
+    <h2 class="msc-h2" id="h-campos">Dicionário de campos</h2>
+    <p class="msc-ajuda">Quais campos vêm preenchidos em cada classe, com o percentual de registros preenchidos. As informações complementares mudam conforme a natureza da conta: as patrimoniais trazem fonte e atributo F/P; as orçamentárias trazem função, subfunção e natureza da receita ou da despesa.</p>
+    <div class="table-wrap msc-table">
+      <table>
+        <thead><tr id="campos-head"></tr></thead>
+        <tbody id="campos-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="msc-notas">
+    <h2 class="msc-h2">Notas</h2>
+    <p><strong>Fonte:</strong> Siconfi / Tesouro Nacional, API de dados abertos, endpoints <code>msc_patrimonial</code> (classes 1 a 4), <code>msc_orcamentaria</code> (5 e 6) e <code>msc_controle</code> (7 e 8).</p>
+    <p><strong>Nomes das contas:</strong> a API traz só os códigos. Os nomes exibidos são rótulos de referência do PCASP para classe, grupo e subgrupo (e as etapas da execução da despesa); níveis mais detalhados aparecem só pelo código. O mesmo vale para natureza da despesa (categoria, grupo, modalidade e elementos mais comuns), natureza da receita (categoria e origem) e funções de governo.</p>
+    <p><strong>Saldo:</strong> diferença entre devedor e credor, mostrada com a natureza resultante (D ou C).</p>
+  </section>
+</main>
+
+<script src="data.js"></script>
+<script src="msc.js"></script>
+</body>
+</html>
